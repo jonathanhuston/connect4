@@ -24,9 +24,9 @@
 ;; game constants
 (def FIRST-PLAYER :x)
 
-(def WIN-SCORE 1000)
-(def LOSE-SCORE -1000)
-(def TIE-SCORE 0)
+(def X-WINS 1000)
+(def O-WINS -1000)
+(def TIE 0)
 
 (def DEFAULT-MAX-DEPTH 3)
 
@@ -95,27 +95,26 @@
 ;; minimax
 (declare best-move)
 
-(defn positional-score [board player]
-  (let [opponent (next-player player)
-        player-set (set (squares-with-piece (replace {nil player} board) player))
-        opponent-set (set (squares-with-piece (replace {nil opponent} board) opponent))
-        player-fours (filter #(every? player-set %) @four-in-a-row)
-        opponent-fours (filter #(every? opponent-set %) @four-in-a-row)
-        player-score (apply + (map #(quot % 7) (flatten player-fours)))
-        opponent-score (apply + (map #(quot % 7) (flatten opponent-fours)))]
-    (- player-score opponent-score)))
+(defn positional-score [board]
+  (let [x-set (set (squares-with-piece (replace {nil :x} board) :x))
+        o-set (set (squares-with-piece (replace {nil :o} board) :o))
+        x-fours (filter #(every? x-set %) @four-in-a-row)
+        o-fours (filter #(every? o-set %) @four-in-a-row)
+        x-score (apply + (map #(quot % 7) (flatten x-fours)))
+        o-score (apply + (map #(quot % 7) (flatten o-fours)))]
+    (- x-score o-score)))
 
 (defn score [board column player depth]
   (let [new-board (drop-piece board column player)
         game-over (game-over? new-board)
         opponent (next-player player)
         this-score (condp = game-over
-                     player WIN-SCORE
-                     opponent LOSE-SCORE
-                     :tie TIE-SCORE
+                     :x X-WINS
+                     :o O-WINS
+                     :tie TIE
                      (if (= depth @max-depth)
-                       (positional-score new-board player)
-                       (- (score new-board (best-move new-board opponent (inc depth)) opponent (inc depth)))))]
+                       (positional-score new-board)
+                       (score new-board (best-move new-board opponent (inc depth)) opponent (inc depth))))]
     (when (and @show-score (= depth 0)) 
       (println player (inc column) (float this-score)))
     (/ this-score (inc depth))))
@@ -123,7 +122,8 @@
 (defn best-move [board player depth]
   (let [valid-moves (free-columns board)
         scores (map #(vector % (score board % player depth)) valid-moves)
-        sorted-scores (sort-by #(second %) > (shuffle scores))]
+        order (if (= player :x) > <)
+        sorted-scores (sort-by #(second %) order (shuffle scores))]
     (first (first sorted-scores))))
 
 
