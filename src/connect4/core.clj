@@ -100,8 +100,8 @@
         o-set (set (squares-with-piece (replace {nil :o} board) :o))
         x-fours (filter #(every? x-set %) @four-in-a-row)
         o-fours (filter #(every? o-set %) @four-in-a-row)
-        x-score (apply + (map #(quot % 7) (flatten x-fours)))
-        o-score (apply + (map #(quot % 7) (flatten o-fours)))]
+        x-score (apply + (map #(inc (quot % 7)) (flatten x-fours)))
+        o-score (apply + (map #(inc (quot % 7)) (flatten o-fours)))]
     (- x-score o-score)))
 
 (defn score [board column player depth]
