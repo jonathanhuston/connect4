@@ -92,8 +92,8 @@
     :else false))
 
 
-;; minimax
-(declare best-move)
+;; minimax with alpha-beta pruning
+(declare -best-move)
 
 (defn positional-score [board]
   (let [x-set (set (squares-with-piece (replace {nil :x} board) :x))
@@ -104,7 +104,7 @@
         o-score (apply + (map #(inc (quot (first %) 7)) o-fours))]
     (- x-score o-score)))
 
-(defn score [board column player depth]
+(defn score [board column player depth alpha beta]
   (let [new-board (drop-piece board column player)
         game-over (game-over? new-board)
         opponent (next-player player)
@@ -114,17 +114,48 @@
                      :tie TIE
                      (if (= depth @max-depth)
                        (positional-score new-board)
-                       (score new-board (best-move new-board opponent (inc depth)) opponent (inc depth))))]
+                       (score new-board 
+                              (-best-move new-board opponent (inc depth) alpha beta) 
+                              opponent 
+                              (inc depth) 
+                              alpha 
+                              beta)))
+        weighted-score (/ this-score (inc depth))]
     (when (and @show-score (= depth 0)) 
       (println player (inc column) (float this-score)))
-    (/ this-score (inc depth))))
+    weighted-score))
 
-(defn best-move [board player depth]
+(defn prune-alpha [board valid-moves depth alpha beta scores]
+  (if (seq valid-moves)
+    (let [move (first valid-moves)
+          s (score board move :x depth alpha beta)
+          remaining-moves (if (>= s beta) nil (rest valid-moves))
+          new-alpha (max s alpha)]
+      (recur board remaining-moves depth new-alpha beta (conj scores [move s])))
+    scores))
+
+(defn prune-beta [board valid-moves depth alpha beta scores]
+  (if (seq valid-moves)
+    (let [move (first valid-moves)
+          s (score board move :o depth alpha beta)
+          remaining-moves (if (<= s alpha) nil (rest valid-moves))
+          new-beta (min s beta)]
+      (recur board remaining-moves depth alpha new-beta (conj scores [move s])))
+    scores))
+
+(defn generate-scores [board valid-moves player depth alpha beta]
+  (if (= player :x) 
+    (prune-alpha board valid-moves depth alpha beta []) 
+    (prune-beta board valid-moves depth alpha beta [])))
+
+(defn -best-move [board player depth alpha beta]
   (let [valid-moves (free-columns board)
-        scores (map #(vector % (score board % player depth)) valid-moves)
-        order (if (= player :x) > <)
-        sorted-scores (sort-by #(second %) order (shuffle scores))]
+        scores (generate-scores board valid-moves player depth alpha beta)
+        sorted-scores (sort-by #(second %) (if (= player :x) > <) (shuffle scores))]
     (first (first sorted-scores))))
+
+(defn best-move [board player]
+  (-best-move board player 0 O-WINS X-WINS))
 
 
 ;; input and check human move
@@ -159,8 +190,8 @@
       (if human-playing?
         (if human-turn?
           (recur (drop-piece board (human-move board) player) (next-player player) true false)
-          (recur (drop-piece board (best-move board player 0) player) (next-player player) true true))
-        (recur (drop-piece board (best-move board player 0) player) (next-player player) false false))
+          (recur (drop-piece board (best-move board player) player) (next-player player) true true))
+        (recur (drop-piece board (best-move board player) player) (next-player player) false false))
       (print-winner game-over))))
 
 (defn -main 
