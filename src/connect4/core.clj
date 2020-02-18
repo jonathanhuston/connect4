@@ -137,7 +137,7 @@
 
 
 ;; main game functions
-(defn init-four-in-a-row
+(defn init-four-in-a-row!
   "initialize all four-in-a-row combinations
   bottom-left: 0, bottom-right: 6, top-left: 35, top-right: 41"
   []
@@ -162,7 +162,7 @@
   ([]
    (-main "-"))
   ([piece] 
-   (init-four-in-a-row)
+   (init-four-in-a-row!)
    (case (clojure.string/upper-case piece)
      "X" (game-loop init-board FIRST-PLAYER true true)
      "O" (game-loop init-board FIRST-PLAYER true false)
