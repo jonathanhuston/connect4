@@ -115,7 +115,7 @@
                        (positional-score new-board player)
                        (- (score new-board (best-move new-board opponent (inc depth)) opponent (inc depth)))))]
     (when (and @show-score (= depth 0)) 
-      (println player column this-score))
+      (println player (inc column) (float this-score)))
     (/ this-score (inc depth))))
 
 (defn best-move [board player depth]
