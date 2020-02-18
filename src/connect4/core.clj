@@ -94,6 +94,14 @@
 ;; minimax
 (declare best-move)
 
+(defn positional-score [board player]
+  (let [opponent (next-player player)
+        player-set (set (squares-with-piece (replace {nil player} board) player))
+        opponent-set (set (squares-with-piece (replace {nil opponent} board) opponent))
+        player-score (count (filter #(every? player-set %) @four-in-a-row))
+        opponent-score (count (filter #(every? opponent-set %) @four-in-a-row))]
+    (- player-score opponent-score)))
+
 (defn score [board column player depth]
   (let [new-board (drop-piece board column player)
         game-over (game-over? new-board)
@@ -103,7 +111,7 @@
                      opponent LOSE-SCORE
                      :tie TIE-SCORE
                      (if (= depth @max-depth)
-                       TIE-SCORE ; replace by positional evaluation
+                       (positional-score new-board player)
                        (- (score new-board (best-move new-board opponent (inc depth)) opponent (inc depth)))))]
     (/ this-score (inc depth))))
 
@@ -161,7 +169,7 @@
      "-" (game-loop init-board FIRST-PLAYER false false)
      (do (println "Usage: connect4 [ - X O] [0 1 2 3 4 5 6 7 8 9]")
          (println "Player must be – (computer vs. computer), X (human first), O (computer first)")
-         (println "Default: computer vs. computer at maximum depth 3"))))
+         (println "Default: computer vs. computer at maximum depth" DEFAULT-MAX-DEPTH))))
   ([piece depth]
    (if (and (= 1 (count depth)) (some (set "0123456789") depth))
      (do
