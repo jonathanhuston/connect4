@@ -101,8 +101,8 @@
         opponent-set (set (squares-with-piece (replace {nil opponent} board) opponent))
         player-fours (filter #(every? player-set %) @four-in-a-row)
         opponent-fours (filter #(every? opponent-set %) @four-in-a-row)
-        player-score (apply + (flatten player-fours))
-        opponent-score (apply + (flatten opponent-fours))]
+        player-score (apply + (map #(quot % 7) (flatten player-fours)))
+        opponent-score (apply + (map #(quot % 7) (flatten opponent-fours)))]
     (- player-score opponent-score)))
 
 (defn score [board column player depth]
