@@ -24,8 +24,8 @@
 ;; game constants
 (def FIRST-PLAYER :x)
 
-(def WIN-SCORE 100)
-(def LOSE-SCORE -100)
+(def WIN-SCORE 1000)
+(def LOSE-SCORE -1000)
 (def TIE-SCORE 0)
 
 (def DEFAULT-MAX-DEPTH 3)
@@ -113,7 +113,7 @@
                      (if (= depth @max-depth)
                        (positional-score new-board player)
                        (- (score new-board (best-move new-board opponent (inc depth)) opponent (inc depth)))))]
-    (/ this-score (inc depth))))
+    this-score))
 
 (defn best-move [board player depth]
   (let [valid-moves (free-columns board)
