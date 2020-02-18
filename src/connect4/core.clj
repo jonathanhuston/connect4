@@ -159,10 +159,14 @@
      "X" (game-loop init-board FIRST-PLAYER true true)
      "O" (game-loop init-board FIRST-PLAYER true false)
      "-" (game-loop init-board FIRST-PLAYER false false)
-     (println "Command line argument must be none, \"X\", or \"O\".")))
+     (do (println "Usage: connect4 [ - X O] [0 1 2 3 4 5 6 7 8 9]")
+         (println "Player must be – (computer vs. computer), X (human first), O (computer first)")
+         (println "Default: computer vs. computer at maximum depth 3"))))
   ([piece depth]
    (if (and (= 1 (count depth)) (some (set "0123456789") depth))
-     (do 
+     (do
        (reset! max-depth (read-string depth))
        (-main piece))
-     (println "Depth must be between 0 and 9."))))
+     (do (println "Usage: connect4 [ - X O] [0 1 2 3 4 5 6 7 8 9]")
+         (println "Maximum depth must be between 0 and 9")
+         (println "Default: computer vs. computer at maximum depth" DEFAULT-MAX-DEPTH)))))
