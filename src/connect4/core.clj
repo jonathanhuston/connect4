@@ -4,7 +4,7 @@
 
 ;; definition of board and players
 
-; bottom-left: 0, bottom-right: 6, top-left: 35, top-right: 41
+; top-left: 0, top-right: 6, bottom-left: 35, bottom-right: 41
 (def init-board (vec (repeat 42 nil)))
 
 (def four-in-a-row (atom []))
@@ -46,7 +46,7 @@
   (print " │"))
 
 (defn print-board [board]
-  (let [rows (reverse (partition 7 board))]
+  (let [rows (partition 7 board)]
     (println)
     (print-row (first rows))
     (println)
@@ -68,13 +68,13 @@
 
 ;; functions for updating and testing board
 (defn drop-piece [board column player]
-  (let [square (first (keep-indexed #(when (and (nil? %2) (= column (mod %1 7))) %1) board))]
+  (let [square (last (keep-indexed #(when (and (nil? %2) (= column (mod %1 7))) %1) board))]
     (assoc board square player)))
 
 (defn free-columns 
   "which columns aren't full?"
   [board]
-  (let [top-row (last (partition 7 board))]
+  (let [top-row (first (partition 7 board))]
     (keep-indexed #(when (nil? %2) %1) top-row)))
 
 (defn squares-with-piece [board player]
@@ -101,9 +101,9 @@
         opponent-set (set (squares-with-piece (replace {nil opponent} board) opponent))
         player-fours (filter #(every? player-set %) @four-in-a-row)
         opponent-fours (filter #(every? opponent-set %) @four-in-a-row)
-        player-score (/ (apply + (flatten player-fours)) (count player-fours))
-        opponent-score (/ (apply + (flatten opponent-fours)) (count opponent-fours))]
-    (- opponent-score player-score)))
+        player-score (apply + (flatten player-fours))
+        opponent-score (apply + (flatten opponent-fours))]
+    (- player-score opponent-score)))
 
 (defn score [board column player depth]
   (let [new-board (drop-piece board column player)
@@ -144,7 +144,7 @@
 ;; main game functions
 (defn init-four-in-a-row!
   "initialize all four-in-a-row combinations
-  bottom-left: 0, bottom-right: 6, top-left: 35, top-right: 41"
+  top-left: 0, top-right: 6, bottom-left: 35, bottom-right: 41"
   []
   (let [horizontal (partition 4 (for [y (range 6) x (range 4) d (range 4)] (+ (* y 7) x d)))
         vertical (partition 4 (for [d (range 3) x (range 7) y (range 4)] (+ x (* y 7) (* d 7))))
