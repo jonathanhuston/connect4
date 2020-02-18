@@ -113,7 +113,7 @@
                      (if (= depth @max-depth)
                        (positional-score new-board player)
                        (- (score new-board (best-move new-board opponent (inc depth)) opponent (inc depth)))))]
-    this-score))
+    (/ this-score (inc depth))))
 
 (defn best-move [board player depth]
   (let [valid-moves (free-columns board)
