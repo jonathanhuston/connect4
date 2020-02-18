@@ -28,8 +28,11 @@
 (def LOSE-SCORE -100)
 (def TIE-SCORE 0)
 
+(def DEFAULT-MAX-DEPTH 3)
 
-(def MAX-DEPTH 3)
+
+;; maximum search depth
+(def max-depth (atom DEFAULT-MAX-DEPTH))
 
 
 ;; functions for displaying board and winner
@@ -99,7 +102,7 @@
                      player WIN-SCORE
                      opponent LOSE-SCORE
                      :tie TIE-SCORE
-                     (if (= depth MAX-DEPTH)
+                     (if (= depth @max-depth)
                        TIE-SCORE ; replace by positional evaluation
                        (- (score new-board (best-move new-board opponent (inc depth)) opponent (inc depth)))))]
     (/ this-score (inc depth))))
@@ -149,11 +152,17 @@
 
 (defn -main 
   ([]
-   (init-four-in-a-row) 
-   (game-loop init-board FIRST-PLAYER false false))
+   (-main "-"))
   ([piece] 
    (init-four-in-a-row)
    (case (clojure.string/upper-case piece)
      "X" (game-loop init-board FIRST-PLAYER true true)
      "O" (game-loop init-board FIRST-PLAYER true false)
-     (println "Command line argument must be none, \"X\", or \"O\"."))))
+     "-" (game-loop init-board FIRST-PLAYER false false)
+     (println "Command line argument must be none, \"X\", or \"O\".")))
+  ([piece depth]
+   (if (and (= 1 (count depth)) (some (set "0123456789") depth))
+     (do 
+       (reset! max-depth (read-string depth))
+       (-main piece))
+     (println "Depth must be between 0 and 9."))))
