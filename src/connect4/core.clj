@@ -103,7 +103,7 @@
         opponent-fours (filter #(every? opponent-set %) @four-in-a-row)
         player-score (/ (apply + (flatten player-fours)) (count player-fours))
         opponent-score (/ (apply + (flatten opponent-fours)) (count opponent-fours))]
-    (- player-score opponent-score)))
+    (- opponent-score player-score)))
 
 (defn score [board column player depth]
   (let [new-board (drop-piece board column player)
