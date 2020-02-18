@@ -31,8 +31,9 @@
 (def DEFAULT-MAX-DEPTH 3)
 
 
-;; maximum search depth
+;; configurable command line options
 (def max-depth (atom DEFAULT-MAX-DEPTH))
+(def show-score (atom false))
 
 
 ;; functions for displaying board and winner
@@ -113,6 +114,8 @@
                      (if (= depth @max-depth)
                        (positional-score new-board player)
                        (- (score new-board (best-move new-board opponent (inc depth)) opponent (inc depth)))))]
+    (when (and @show-score (= depth 0)) 
+      (println player column this-score))
     (/ this-score (inc depth))))
 
 (defn best-move [board player depth]
@@ -177,4 +180,7 @@
        (-main piece))
      (do (println "Usage: connect4 [ - X O] [0 1 2 3 4 5 6 7 8 9]")
          (println "Maximum depth must be between 0 and 9")
-         (println "Default: computer vs. computer at maximum depth" DEFAULT-MAX-DEPTH)))))
+         (println "Default: computer vs. computer at maximum depth" DEFAULT-MAX-DEPTH))))
+  ([piece depth _]
+   (reset! show-score true)
+   (-main piece depth)))
