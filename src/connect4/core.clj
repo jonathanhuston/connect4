@@ -119,7 +119,7 @@
                               alpha
                               beta)))]
     (when (and @show-score (= depth 0))
-      (println player (inc column) (float this-score) (float alpha) (float beta)))
+      (println (printed-piece player) (inc column) (float this-score)))
     this-score))
 
 (defn minimax [board valid-moves player depth alpha beta scores]
