@@ -1,44 +1,14 @@
 # connect4
 
-FIXME: description
-
-## Installation
-
-Download from http://example.com/FIXME.
+Connect4 in Clojure using minimax and alpha-beta pruning
 
 ## Usage
 
-FIXME: explanation
-
-    $ java -jar connect4-0.1.0-standalone.jar [args]
+    $ java -jar connect4-0.1.0-standalone.jar [- X O] [0 1 2 3 4 5 6 7 8 9] [-s]
 
 ## Options
 
-FIXME: listing of options this app accepts.
-
-## Examples
-
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
-
-## License
-
-Copyright © 2020 FIXME
-
-This program and the accompanying materials are made available under the
-terms of the Eclipse Public License 2.0 which is available at
-http://www.eclipse.org/legal/epl-2.0.
-
-This Source Code may also be made available under the following Secondary
-Licenses when the conditions for such availability set forth in the Eclipse
-Public License, v. 2.0 are satisfied: GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or (at your
-option) any later version, with the GNU Classpath Exception which is available
-at https://www.gnu.org/software/classpath/license.html.
+Player must be – (computer vs. computer), X (human first), O (computer first)
+Search depth must be between 0 and 9
+Flag -s displays board scores and current alpha/beta
+Default (no args): computer vs. computer at search depth 3, no score info
