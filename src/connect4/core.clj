@@ -78,10 +78,10 @@
     (keep-indexed #(when (nil? %2) %1) top-row)))
 
 (defn squares-with-piece [board player]
-  (keep-indexed #(when (= player %2) %1) board))
+  (set (keep-indexed #(when (= player %2) %1) board)))
 
 (defn four-in-a-row? [board player]
-  (let [set-of-squares (set (squares-with-piece board player))]
+  (let [set-of-squares (squares-with-piece board player)]
     (some #(every? set-of-squares %) @four-in-a-row)))
 
 (defn game-over? [board]
@@ -96,7 +96,7 @@
 (declare -best-move)
 
 (defn evaluate-position [board player]
-  (let [full-board (set (squares-with-piece (replace {nil player} board) player))
+  (let [full-board (squares-with-piece (replace {nil player} board) player)
         all-fours (filter #(every? full-board %) @four-in-a-row)
         player-score (apply + (map #(inc (quot (first %) 7)) all-fours))]
     player-score))
@@ -106,17 +106,15 @@
 
 (defn score [board column player depth alpha beta]
   (let [new-board (drop-piece board column player)
-        game-over (game-over? new-board)
-        opponent (next-player player)
-        this-score (condp = game-over
+        this-score (condp = (game-over? new-board)
                      :x X-WINS
                      :o O-WINS
                      :tie TIE
                      (if (= depth @max-depth)
                        (positional-score new-board)
                        (score new-board
-                              (-best-move new-board opponent (inc depth) alpha beta)
-                              opponent
+                              (-best-move new-board (next-player player) (inc depth) alpha beta)
+                              (next-player player)
                               (inc depth)
                               alpha
                               beta)))]
@@ -124,34 +122,25 @@
       (println player (inc column) (float this-score) (float alpha) (float beta)))
     this-score))
 
-(defn maximizing [board valid-moves depth alpha beta scores]
+(defn minimax [board valid-moves player depth alpha beta scores]
   (if (seq valid-moves)
     (let [move (first valid-moves)
-          s (score board move :x depth alpha beta)
-          new-alpha (max s alpha)
-          remaining-moves (if (> new-alpha beta) nil (rest valid-moves))]
-      (recur board remaining-moves depth new-alpha beta (conj scores [move s])))
+          s (score board move player depth alpha beta)
+          new-alpha (if (= player :x) (max s alpha) alpha)
+          new-beta (if (= player :o) (min s beta) beta)
+          remaining-moves (if (> new-alpha new-beta) nil (rest valid-moves))]
+      (recur board remaining-moves player depth new-alpha new-beta (conj scores [move s])))
     scores))
-
-(defn minimizing [board valid-moves depth alpha beta scores]
-  (if (seq valid-moves)
-    (let [move (first valid-moves)
-          s (score board move :o depth alpha beta)
-          new-beta (min s beta)
-          remaining-moves (if (> alpha new-beta) nil (rest valid-moves))]
-      (recur board remaining-moves depth alpha new-beta (conj scores [move s])))
-    scores))
-
-(defn generate-scores [board valid-moves player depth alpha beta]
-  (if (= player :x) 
-    (maximizing board valid-moves depth O-WINS beta []) 
-    (minimizing board valid-moves depth alpha X-WINS [])))
 
 (defn -best-move [board player depth alpha beta]
   (let [valid-moves (free-columns board)
+        new-alpha (if (= player :x) NINF alpha)
+        new-beta (if (= player :o) beta INF)
         ; scores (map #(vector % (score board % player depth alpha beta)) valid-moves)
-        scores (generate-scores board valid-moves player depth alpha beta)
-        sorted-scores (sort-by #(second %) (if (= player :x) > <) (shuffle scores))]
+        scores (minimax board valid-moves player depth new-alpha new-beta [])
+        sorted-scores (sort-by #(second %) (if (= player :x) > <) (shuffle scores))
+        ; sorted-scores (sort-by #(second %) (if (= player :x) > <) scores)
+        ]
     (first (first sorted-scores))))
 
 (defn best-move [board player]
