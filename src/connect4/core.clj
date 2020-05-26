@@ -107,7 +107,7 @@
 
 (defn score [board column player depth alpha beta]
   (let [new-board (drop-piece board column player)
-        this-score (condp = (game-over? new-board)
+        this-score (case (game-over? new-board)
                      :x X-WINS
                      :o O-WINS
                      :tie TIE
