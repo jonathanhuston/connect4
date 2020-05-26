@@ -12,6 +12,7 @@
                     nil " "})
 
 (def color-piece {:x #'colors/red
+                  
                   :o #'colors/cyan
                   nil #'colors/white})
 
@@ -134,10 +135,8 @@
 
 (defn -best-move [board player depth alpha beta]
   (let [valid-moves (free-columns board)
-        new-alpha (if (= player :x) NINF alpha)
-        new-beta (if (= player :o) beta INF)
         ; scores (map #(vector % (score board % player depth alpha beta)) valid-moves)
-        scores (minimax board valid-moves player depth new-alpha new-beta [])
+        scores (minimax board valid-moves player depth alpha beta [])
         sorted-scores (sort-by #(second %) (if (= player :x) > <) (shuffle scores))
         ; sorted-scores (sort-by #(second %) (if (= player :x) > <) scores)
         ]
