@@ -14,7 +14,9 @@ docker pull jonathanhuston/connect4
 
 ## Usage
 
-    $ java -jar connect4-0.1.0-standalone.jar [- X O] [0 1 2 3 4 5 6 7 8 9] [-s]
+    $ java -jar connect4-0.1.0-SNAPSHOT-standalone.jar [- X O] [0 1 2 3 4 5 6 7 8 9] [-s]
+    or
+    $ docker run -i --rm jonathanhuston/connect4 [- X O] [0 1 2 3 4 5 6 7 8 9] [-s]
 
 ## Options
 

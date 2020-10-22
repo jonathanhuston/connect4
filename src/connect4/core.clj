@@ -12,7 +12,6 @@
                     nil " "})
 
 (def color-piece {:x #'colors/red
-                  
                   :o #'colors/cyan
                   nil #'colors/white})
 
